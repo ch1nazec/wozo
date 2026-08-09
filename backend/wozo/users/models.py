@@ -12,13 +12,14 @@ def validate_ages(value):
 
 # Create your models here.
 class CustomUser(AbstractUser):
+    email = models.EmailField(verbose_name='Почта пользователя', blank=False, null=False, unique=True)
     third_name = models.CharField(verbose_name='Отчество', max_length=100, blank=True, null=True)
 
     date_birth = models.DateField(verbose_name='Дата рождения', validators=[validate_ages], blank=True, null=True)
     phone_number = PhoneNumberField(region='RU', blank=True, null=True)
 
     def __str__(self):
-        return self.username
+        return f'{self.username} - {self.last_name} {self.first_name} {self.third_name}'
 
 
     class Meta:
@@ -40,3 +41,10 @@ class Seller(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.get_status_display()}"
+
+    class Meta:
+        ordering = ['user__id']
+        indexes = [models.Index(fields=['status', 'user'])]
+
+        verbose_name = 'Продавец'
+        verbose_name_plural = 'Продавцы'
