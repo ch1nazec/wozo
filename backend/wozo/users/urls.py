@@ -1,0 +1,15 @@
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from .views import SellerRegisterView, SellerViewSet, UserViewSet, UserRegisterView
+
+
+router = DefaultRouter()
+router.register(r'sellers', SellerViewSet, basename='seller')
+router.register(r'users', UserViewSet, basename='user')
+
+urlpatterns = [
+    path('api/v1/seller/register/', SellerRegisterView.as_view(), name='seller-register'),
+    path('api/v1/register/', UserRegisterView.as_view(), name='user-register'),
+
+    path('api/v1/', include(router.urls)),
+]

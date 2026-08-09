@@ -37,7 +37,8 @@ class Seller(models.Model):
         OOO = 'OOO', 'ООО'
 
     status = models.CharField(max_length=50, choices=Business.choices)
-    user = models.OneToOneField('CustomUser', on_delete=models.CASCADE)
+    user = models.OneToOneField('CustomUser', on_delete=models.CASCADE, related_name='seller')
+    is_active = models.BooleanField(verbose_name='Действие продавца', default=True)
 
     def __str__(self):
         return f"{self.user.username} - {self.get_status_display()}"
