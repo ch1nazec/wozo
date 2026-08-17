@@ -10,6 +10,7 @@ class Category(MPTTModel):
     name = models.CharField(max_length=150,
                             blank=False, null=False,
                             unique=True, verbose_name='Категории товаров')
+    slug = models.SlugField(max_length=150, blank=True, null=True, unique=True)
     parent = TreeForeignKey('self', on_delete=models.CASCADE, null=True,
                             blank=True, related_name='subcategories')
 
