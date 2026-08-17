@@ -21,7 +21,7 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         fields = [
             'username',
             'last_name', 'first_name', 'third_name',
-            'date_birth', 'email', 'phone_number',]
+            'date_birth', 'email', 'phone_number', 'confirm_password']
 
     def validate_password(self, value):
         validate_password(value)
@@ -57,13 +57,6 @@ class UserSerializer(serializers.ModelSerializer):
             value = attrs.get(field)
             if value and has_forbidden_chars(value):
                 raise serializers.ValidationError('ФИО должно содержать только кириллицу, либо латиницу')
-            
-        phone_number = attrs.get('phone_number')
-        if not(phone_number is None and phone_number == ''):
-            if not phone_number.isdigit():
-                raise serializers.ValidationError('Номер телефона должен содержать только цифры.')
-            if phone_number.startswith('7'):
-                raise serializers.ValidationError('Номер телефона должен содержать в себе цифры и начинаться с 7')
         
         return attrs
 

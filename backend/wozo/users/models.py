@@ -27,7 +27,10 @@ class CustomUser(AbstractUser):
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
 
-        indexes = [models.Index(fields=['first_name', 'date_birth', 'phone_number'])]
+        indexes = [
+            models.Index(fields=['first_name']),
+            models.Index(fields=['date_birth',]),
+            models.Index(fields=['phone_number'])]
 
 
 class Seller(models.Model):
@@ -45,7 +48,8 @@ class Seller(models.Model):
 
     class Meta:
         ordering = ['user__id']
-        indexes = [models.Index(fields=['status', 'user'])]
+        indexes = [models.Index(fields=['status']),
+                   models.Index(fields=['user']),]
 
         verbose_name = 'Продавец'
         verbose_name_plural = 'Продавцы'
