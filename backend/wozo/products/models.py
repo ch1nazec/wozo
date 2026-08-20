@@ -10,7 +10,8 @@ class Category(MPTTModel):
     name = models.CharField(max_length=150,
                             blank=False, null=False,
                             unique=True, verbose_name='Категории товаров')
-    slug = models.SlugField(max_length=150, blank=True, null=True, unique=True)
+    slug = models.SlugField(max_length=150, blank=True,
+    null=True, unique=True)
     parent = TreeForeignKey('self', on_delete=models.CASCADE, null=True,
                             blank=True, related_name='subcategories')
 
@@ -33,7 +34,10 @@ class Category(MPTTModel):
 class Product(models.Model):
     name = models.CharField(max_length=200, blank=False,
                             null=False, verbose_name='Название товара')
-    price = models.DecimalField(verbose_name='Цена продукта', decimal_places=2, max_digits=20)
+    slug = models.SlugField(max_length=200, blank=True,
+                            null=True, verbose_name='Слаг товара')
+    price = models.DecimalField(verbose_name='Цена продукта',
+                                decimal_places=2, max_digits=20)
     seller = models.ForeignKey('users.Seller', on_delete=models.CASCADE,
                                related_name='products', verbose_name='Имя продавца')
     is_active = models.BooleanField(default=True, verbose_name='Видимость продукта')

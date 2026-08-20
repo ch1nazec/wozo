@@ -1,4 +1,4 @@
-from models import Seller
+from .models import Seller
 
 
 def check_seller(seller: dict):

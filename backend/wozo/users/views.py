@@ -1,6 +1,16 @@
 from django.contrib.auth import get_user_model
+
 from rest_framework import viewsets, generics
+from rest_framework import status
+
+from rest_framework.request import Request
+from rest_framework.response import Response
+
+from rest_framework.views import APIView
 from rest_framework import permissions
+
+from rest_framework import permissions
+
 from .serializers import UserSerializer, SellerSerializer, UserRegisterSerializer, SellerRegistrationSerializer
 from .models import Seller
 
@@ -9,9 +19,20 @@ CustomUser = get_user_model()
 
 
 # Create your views here.
+class UserProfileView(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def get(self, request: Request):
+        profile = request.user
+        serializer = UserSerializer(profile)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
 class UserRegisterView(generics.CreateAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = UserRegisterSerializer
+
     permission_classes = (permissions.AllowAny,)
 
 
@@ -19,10 +40,13 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = CustomUser.objects.all()
     serializer_class = UserSerializer
 
+    permission_classes = (permissions.IsAdminUser,)
+
 
 class SellerRegisterView(generics.CreateAPIView):
     queryset = Seller.objects.all()
     serializer_class = SellerRegistrationSerializer
+
     permission_classes = (permissions.IsAuthenticated,)
 
 
