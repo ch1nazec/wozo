@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import SellerRegisterView, SellerViewSet, UserViewSet, UserRegisterView, UserProfileView
+from .views import SellerRegisterView, SellerViewSet, UserViewSet, UserRegisterView, UserProfileView, UserLoginView
 
 
 router = DefaultRouter()
@@ -13,6 +13,7 @@ urlpatterns = \
     path('register/', UserRegisterView.as_view(), name='user-register'),
 
     path('profile/', UserProfileView.as_view(), name='user-profile'),
+    path('login/', UserLoginView.as_view(), name='user-login'),
 
     path('/', include(router.urls)),
 ]

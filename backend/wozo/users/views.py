@@ -1,4 +1,4 @@
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, login
 
 from rest_framework import viewsets, generics
 from rest_framework import status
@@ -9,9 +9,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import permissions
 
-from rest_framework import permissions
+from rest_framework_simplejwt.tokens import RefreshToken
 
-from .serializers import UserSerializer, SellerSerializer, UserRegisterSerializer, SellerRegistrationSerializer
+from .serializers import UserSerializer, SellerSerializer, UserRegisterSerializer, SellerRegistrationSerializer, UserLoginSerializer
 from .models import Seller
 
 
@@ -34,6 +34,27 @@ class UserRegisterView(generics.CreateAPIView):
     serializer_class = UserRegisterSerializer
 
     permission_classes = (permissions.AllowAny,)
+
+
+class UserLoginView(generics.GenericAPIView):
+    serializer_class = UserLoginSerializer
+    permission_classes = (permissions.AllowAny,)
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        user = serializer.validated_data['user']
+        login(request, user)
+
+        refresh = RefreshToken.for_user(user)
+        return Response({
+            'user': UserSerializer(user).data,
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+            'message': 'Вы успешно вошли в аккаунт.'
+        }, status=status.HTTP_200_OK)
+        
 
 
 class UserViewSet(viewsets.ModelViewSet):

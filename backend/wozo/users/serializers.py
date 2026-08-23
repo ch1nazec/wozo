@@ -1,6 +1,6 @@
 import re
 
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, authenticate
 from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 from .models import Seller
@@ -13,6 +13,29 @@ def has_forbidden_chars(value: str):
     return bool(re.findall(r'[^А-Яа-яA-Za-zЁё\s\-]', value))
 
 
+class UserLoginSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    password = serializers.CharField()
+
+    def validate(self, attrs):
+        username = attrs.get('username')
+        password = attrs.get('password')
+
+        if username and password:
+            user = authenticate(
+                request=self.context.get('request'),
+                username=username, password=password)
+            if not user:
+                raise serializers.ValidationError(
+                    'User not found.')
+            attrs['user'] = user
+            return attrs
+        else:
+            raise serializers.ValidationError(
+                'Введите почту и пароль.'
+            )
+
+
 class UserRegisterSerializer(serializers.ModelSerializer):
     confirm_password = serializers.CharField(write_only=True, min_length=8)
 
@@ -20,13 +43,13 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         model = CustomUser
         fields = [
             'username',
-            'last_name', 'first_name', 'third_name',
+            'last_name', 'first_name', 'third_name', 'password',
             'date_birth', 'email', 'phone_number', 'confirm_password']
 
-    def validate_password(self, value):
-        validate_password(value)
+    # def validate_password(self, value):
+    #     validate_password(value)
 
-        return value
+    #     return value
 
     def validate(self, attrs):
         if attrs['password'] != attrs['confirm_password']:
@@ -34,7 +57,7 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         return super().validate(attrs)
 
     def create(self, validated_data):
-        user = CustomUser.objects.create(
+        user = CustomUser.objects.create_user(
             username=validated_data['username'], first_name=validated_data['first_name'],
             last_name=validated_data['last_name'], third_name=validated_data['third_name'],
             date_birth=validated_data['date_birth'], email=validated_data['email'],

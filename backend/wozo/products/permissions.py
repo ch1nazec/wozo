@@ -5,7 +5,7 @@ from rest_framework.permissions import BasePermission, SAFE_METHODS
 
 
 class IsSellerOrAdmin(BasePermission):
-    message = 'Является ли пользователь продавцом'
+    message = 'Является ли пользователь продавцом (разрешено чтение всем юзерам)'
 
 
     def has_permission(self, request: Request, view):

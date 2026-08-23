@@ -2,7 +2,7 @@ from rest_framework.routers import DefaultRouter
 
 from django.urls import path, include
 from .views import (CategoryViewSet, ProductViewSet,
-                    ImageCreateAPI)
+                    ImageCreateAPI, ImageListAPI)
 
 
 router = DefaultRouter()
@@ -11,6 +11,7 @@ router.register(r'', ProductViewSet, basename='product')
 
 urlpatterns = \
 [
-    path('image/', ImageCreateAPI.as_view(), name='image-create'),
+    path('images/<int:product_id>/', ImageListAPI.as_view(), name='images-list'),
+    path('images/', ImageCreateAPI.as_view(), name='images-create'),
     path('', include(router.urls)),
 ]
