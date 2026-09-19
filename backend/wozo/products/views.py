@@ -8,7 +8,8 @@ from .serializers import (CategorySerializer,
 
 from rest_framework import viewsets, generics, permissions
 from rest_framework.response import Response
-from rest_framework.decorators import action
+from rest_framework.request import Request
+from rest_framework.decorators import action, api_view
 
 from .permissions import IsAdminOrReadUser, IsSellerOrAdmin
 
@@ -40,11 +41,29 @@ class ProductViewSet(viewsets.ModelViewSet):
 
 
     @action(detail=False, methods=['get'])
-    def my(self, request):
+    def my(self, request: Request):
         products = self.get_queryset().filter(seller__id=request.user)
         serializer = self.get_serializer_class(products, many=True)
         return Response(serializer.data)
 
+
+class SellerProductsAPI(viewsets.ReadOnlyModelViewSet):
+    queryset = Product.objects.all()
+    serializer_class = ProductReadSerializer
+
+
+    def list(self, request: Request, *args, **kwargs):
+        seller_id = self.kwargs.get('seller_id')
+        products = Product.objects.filter(seller__id=seller_id).select_related('seller')
+
+        page = self.paginate_queryset(products)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(products, many=True)
+        return Response(serializer.data)
+    
 
 class ImageCreateAPI(generics.CreateAPIView):
     permission_classes = (IsSellerOrAdmin,)
@@ -60,3 +79,16 @@ class ImageListAPI(generics.ListAPIView):
         if product_id:
             return ImageProduct.objects.filter(product_id=product_id).select_related('product')
         return ImageProduct.objects.none()
+
+
+@api_view(['POST'])
+def add_stocks_all_products(request: Request):
+    stocks = request.data.get('stocks')
+    products = Product.objects.all()
+
+    for product in products:
+        product.stocks += stocks
+        product.save()
+
+    serializer = ProductReadSerializer(products, many=True)
+    return Response(serializer.data)

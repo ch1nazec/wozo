@@ -1,10 +1,7 @@
 import json, redis
-
-from decimal import Decimal
 from django.conf import settings
 
-from rest_framework.request import Request
-
+from decimal import Decimal
 from products.models import Product
 
 
@@ -32,7 +29,7 @@ class Cart:
 
 
     def _save(self):
-        data = json.dumps(self._cart_data)
+        data = json.dumps(self._cart_data, default=str)
         self.redis_client.setex(
             self.cart_key,
             settings.CART_TTL,
@@ -41,12 +38,12 @@ class Cart:
 
     def add(self, product, quantity: 1, override_quantity=False):
         cart = self._load()
-        product_id = str(product.id)
+        product_id = product.id
 
         if product_id not in cart:
             cart[product_id] = {
                 'quantity': 0,
-                'price': str(product.price)}
+                'price': product.price}
             
         if override_quantity:
             cart[product_id]['quantity'] = quantity
@@ -80,14 +77,15 @@ class Cart:
         for product in products:
             cart_copy[str(product.pk)]['product'] = product
         for item in cart_copy.values():
-            item['price'] = Decimal(item['price'])
-            item['total_price'] = item['price'] * item['quantity']
+            price = Decimal(item['price'])
+            item['price'] = Decimal(price)
+            item['total_price'] = Decimal(price * item['quantity'])
             yield item
 
 
     def __len__(self):
         cart = self._load()
-        return sum(item['quantity'] for item in cart)
+        return sum(item['quantity'] for item in cart.values())
 
 
     def get_total_price(self):

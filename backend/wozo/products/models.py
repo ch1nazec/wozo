@@ -44,6 +44,7 @@ class Product(models.Model):
 
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True,
                                  related_name='products', verbose_name='Категория товара',)
+    stocks = models.PositiveBigIntegerField(verbose_name='Остаток товара', null=False, default=0)
 
     class Meta:
         verbose_name = 'Продукт'
@@ -56,7 +57,7 @@ class Product(models.Model):
         ]
 
     def __str__(self):
-        return f'{self.name} - {self.price} RUB'
+        return f'Id: {self.pk} name: {self.name} - {self.price} RUB'
 
 
 def generate_name_of_image(instance, filename):

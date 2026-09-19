@@ -5,12 +5,12 @@ from .models import Category, Product, ImageProduct
 # Register your models here.
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ['name', 'slug', 'price', 'seller', 'is_active', 'category']
-    search_fields = ['name', 'slug', 'price', 'seller__user__first_name', 'is_active']
-    list_filter = ['price', 'name']
+    list_display = ['id', 'name', 'slug', 'price', 'stocks', 'seller', 'is_active', 'category']
+    search_fields = ['name', 'slug', 'price', 'stocks', 'seller__user__first_name', 'is_active']
+    list_filter = ['price', 'name', 'stocks',]
 
     list_per_page = 20
-    ordering = ['name', 'price']
+    ordering = ['name', 'price', 'stocks',]
 
 
 @admin.register(Category)

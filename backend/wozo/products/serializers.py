@@ -66,6 +66,11 @@ class ProductWriteSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('Такого продавца не существует.')
         return super().validate(attrs)
 
+    def validate_price(self, value):
+        if value <= 0:
+            serializers.ValidationError('Number should be at least than 0.')
+        return value
+
 
 class ProductReadSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)
@@ -74,7 +79,17 @@ class ProductReadSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = ['name', 'price',
+        fields = ['id', 'name', 'price', 'stocks',
                   'seller', 'is_active',
                   'category', 'images']
         read_only_fields = ['seller']
+
+
+class ProductCartSerializer(serializers.ModelSerializer):
+    category_name = serializers.CharField(source='category.name', read_only=True)
+
+    class Meta:
+        model = Product
+        fields = [
+            'id', 'name', 'price',
+            'category', 'category_name', 'is_active']
