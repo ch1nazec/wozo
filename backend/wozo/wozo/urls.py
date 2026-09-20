@@ -30,7 +30,9 @@ urlpatterns = [
     path('api/v1/users/', include('users.urls')),
     path('api/v1/products/', include('products.urls')),
     path('api/v1/cart/', include('cart.urls')),
-    path('api/v1/', include('orders.urls')),
+
+    path('api/v1/orders/', include('orders.urls')),
+    path('api/v1/pickups/', include('pickups.urls')),
 
     path('api/token/', TokenObtainPairView.as_view()),
     path('api/token/refresh/', TokenRefreshView.as_view()),

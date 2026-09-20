@@ -1,17 +1,23 @@
 from django.db import transaction
+from django.core.exceptions import ValidationError
 
 from rest_framework.response import Response
 from rest_framework.request import Request
 
 from rest_framework import status, viewsets
-from rest_framework.decorators import action
+from rest_framework.views import APIView
+from rest_framework.decorators import action, api_view
 
-from .models import Order, OrderItem, PickupPoint, OrderPickup, OrderPickupHistory
+from .models import Order, OrderItem
 from .serializer import (OrderItemReadSerializer, OrderItemWriteSerializer,
-                         OrderReadSerializer, OrderWriteSerializer, PickupPointSerializer)
+                         OrderReadSerializer, OrderWriteSerializer)
 from cart.cart import Cart
 
+
 from products.models import Product
+from pickups.models import PickupPoint, OrderPickup, OrderPickupHistory
+
+from .services import check_order
 
 
 # Create your views here.
@@ -113,24 +119,48 @@ class OrderViewSet(viewsets.ModelViewSet):
             order.save()
             cart.clear()
 
-        print(order)
         return Response(data={
                 'order': order,
                 'order_id': order.pk,
                 'pickup_id': pickup_id,}, status=status.HTTP_201_CREATED)
 
 
-class PickupPointViewSet(viewsets.ModelViewSet):
-    queryset = PickupPoint.objects.all()
-    serializer_class = PickupPointSerializer
+class OrderStatusUpdateView(APIView):
+    def post(self, request):
+
+        order_id = request.data.get('order_id')
+        action = request.data.get('action')
+
+        allowed_actions = set(choice[0] for choice in Order.STATUS_CHOICES)
+
+        if action not in allowed_actions:
+            return Response(data={'error': 'Такой метод не предусмотрен.'},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        order = check_order(order_id)
+        if not order:
+            return Response({'error': f'Заказа с #{order_id} не существует.'},
+                            status=status.HTTP_404_NOT_FOUND)
+
+        try:
+            with transaction.atomic():
+                order.change_status(action)
+        except ValidationError as error:
+            return Response({'error': str(error)}, 
+                            status=status.HTTP_400_BAD_REQUEST)
+        
+        return Response({'status': action},
+                        status=status.HTTP_200_OK)
 
 
-    def create(self, request: Request, *args, **kwargs):
-        is_many = isinstance(request.data, list)
+@api_view(['GET'])
+def order_items(request: Request, order_id: int):
+    order = check_order(order_id)
+    if not order:
+        return Response({'error': f'Заказа с {order_id}# не существует.'},
+                        status=status.HTTP_404_NOT_FOUND)
 
-        serializer = self.get_serializer(data=request.data, many=is_many)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
+    order_items = OrderItem.objects.filter(order=order)
+    serializer = OrderItemReadSerializer(order_items, many=True).data
 
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+    return Response(serializer, status=status.HTTP_200_OK)

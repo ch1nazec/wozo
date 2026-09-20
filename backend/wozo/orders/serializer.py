@@ -1,19 +1,10 @@
-from django.core.validators import DecimalValidator
 from rest_framework import serializers
-from .models import Order, OrderItem, PickupPoint
+from .models import Order, OrderItem
 
 from users.models import CustomUser
 
 from products.models import Product
 
-
-class PickupPointSerializer(serializers.ModelSerializer):
-    latitude = serializers.DecimalField(max_digits=9, decimal_places=6)
-    longitude = serializers.DecimalField(max_digits=9, decimal_places=6)
-
-    class Meta:
-        model = PickupPoint
-        fields = ('id', 'latitude', 'longitude')
 
 
 class OrderItemWriteSerializer(serializers.ModelSerializer):
@@ -72,7 +63,7 @@ class OrderReadSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        fields = ('id', 'user', 'status', 'order_items', 'status_display', 'created_at', 'updated_at')
+        fields = ('id', 'user', 'status', 'status_display', 'order_items', 'created_at', 'updated_at')
 
     def get_status_display(self, obj):
         return dict(Order.STATUS_CHOICES).get(obj.status, obj.status)
