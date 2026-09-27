@@ -17,12 +17,17 @@ from cart.cart import Cart
 from products.models import Product
 from pickups.models import PickupPoint, OrderPickup, OrderPickupHistory
 
+from .filters import OrderFilters
 from .services import check_order
 
 
 # Create your views here.
 class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.all()
+    filterset_class = OrderFilters
+
+    ordering = ('created_at',)
+    ordering_fields = ('created_at', 'updated_at', 'status')
 
 
     @action(detail=True, methods=['post'], url_path='cancel')

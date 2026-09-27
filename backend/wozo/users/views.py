@@ -21,6 +21,7 @@ from .serializers import (
     AgentSerializer, AgentSerializerRegistration,
     PersonalDataSerializer,
     PersonalDataRegistrationSerializer)
+from .filters import SellerFilters, PersonalDataFilters
 from .models import Seller, Agent, PersonalData
 
 
@@ -82,6 +83,7 @@ class SellerRegisterView(generics.CreateAPIView):
 
 class SellerViewSet(viewsets.ModelViewSet):
     serializer_class = SellerSerializer
+    filterset_class = SellerFilters
 
     def get_queryset(self):
         user = self.request.user
@@ -117,6 +119,7 @@ class AgentViewSet(viewsets.ModelViewSet):
 
 class PersonalDataViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
+    filterset_class = PersonalDataFilters
 
     def get_serializer_class(self):
         if self.action in {'create', 'update', 'partial_update'}:

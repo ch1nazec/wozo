@@ -12,6 +12,7 @@ from rest_framework import viewsets
 
 from rest_framework import status
 
+from .filters import PickupPointFilters
 from .models import PickupPoint, OrderPickupHistory, OrderPickup, PickupFeedback, PickupImage
 from .serializer import (PickupPointSerializer, OrderPickupHistorySerializer,
                          OrderPickupSerializer, PickupImageSerializer,
@@ -22,6 +23,9 @@ from .serializer import (PickupPointSerializer, OrderPickupHistorySerializer,
 class PickupPointViewSet(viewsets.ModelViewSet):
     queryset = PickupPoint.objects.all()
     serializer_class = PickupPointSerializer
+    filterset_class = PickupPointFilters
+
+    ordering_fields = ('latitude', 'longitude')
 
 
     def create(self, request: Request, *args, **kwargs):

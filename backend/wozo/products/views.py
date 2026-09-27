@@ -12,6 +12,7 @@ from rest_framework.request import Request
 from rest_framework.decorators import action, api_view
 
 from .permissions import IsAdminOrReadUser, IsSellerOrAdmin
+from .filters import ProductFilter, CategoryFilter
 
 
 # Create your views here.
@@ -19,11 +20,19 @@ class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.select_related('parent').all()
     permission_classes = (IsAdminOrReadUser,)
     serializer_class = CategorySerializer
+    filterset_class = CategoryFilter
+
+    ordering = ('name',)
+    ordering_fields = ('name',)
 
 
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.select_related('seller', 'category').all()
     permission_classes = (IsSellerOrAdmin,)
+    filterset_class = ProductFilter
+
+    ordering = ('name',)
+    ordering_fields = ('name', 'price', 'stocks',)
 
 
     def get_serializer_class(self):
@@ -50,6 +59,9 @@ class ProductViewSet(viewsets.ModelViewSet):
 class SellerProductsAPI(viewsets.ReadOnlyModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductReadSerializer
+    
+    ordering = ('name',)
+    ordering_fields = ('name', 'price', 'stocks')
 
 
     def list(self, request: Request, *args, **kwargs):
