@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import PickupPoint, OrderPickup, OrderPickupHistory
+from .models import PickupPoint, OrderPickupHistory, OrderPickup, PickupFeedback, PickupImage
 
 
 # Register your models here.
@@ -27,3 +27,27 @@ class OrderPickupHistoryAdmin(admin.ModelAdmin):
     search_fields = ('order_pickup', 'time_active')
 
     list_per_page = 30
+
+
+@admin.register(PickupFeedback)
+class PickupFeedbackAdmin(admin.ModelAdmin):
+    ATTRIBUTES_CLASS = ('id', 'pickup', 'user', 'rating', 'text')
+
+    list_display = ATTRIBUTES_CLASS
+    search_fields = ('id', 'pickup', 'user')
+    list_filter = ('id', 'pickup', 'user', 'rating')
+
+    list_per_page = 30
+    ordering = ATTRIBUTES_CLASS
+
+
+@admin.register(PickupImage)
+class PickupImageAdmin(admin.ModelAdmin):
+    ATTRIBUTES_CLASS = ('id', 'image', 'pickup')
+
+    list_display = ATTRIBUTES_CLASS
+    search_fields = ATTRIBUTES_CLASS
+    list_filter = ATTRIBUTES_CLASS
+
+    list_per_page = 30
+    ordering = ATTRIBUTES_CLASS

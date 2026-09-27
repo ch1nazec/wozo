@@ -1,9 +1,9 @@
 import re
 
 from django.contrib.auth import get_user_model, authenticate
-from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import serializers
-from .models import Seller
+from .models import Seller, PersonalData, Agent
 
 
 CustomUser = get_user_model()
@@ -11,6 +11,26 @@ CustomUser = get_user_model()
 
 def has_forbidden_chars(value: str):
     return bool(re.findall(r'[^А-Яа-яA-Za-zЁё\s\-]', value))
+
+def has_digits(value: str) -> bool:
+    return value.isdigit()
+
+def has_check_len(value: str, length: int) -> bool:
+    return len(value) == length
+
+
+def digits_of_length(length, field_name):
+    def validator(value):
+        if not has_check_len(value, length):
+            raise serializers.ValidationError(
+                f'{field_name} должен состоять из {length} цифр.'
+            )
+        if not has_digits(value):
+            raise serializers.ValidationError(
+                f'{field_name} должен состоять только из цифр.'
+            )
+        return value
+    return validator
 
 
 class UserLoginSerializer(serializers.Serializer):
@@ -45,11 +65,6 @@ class UserRegisterSerializer(serializers.ModelSerializer):
             'username',
             'last_name', 'first_name', 'third_name', 'password',
             'date_birth', 'email', 'phone_number', 'confirm_password']
-
-    # def validate_password(self, value):
-    #     validate_password(value)
-
-    #     return value
 
     def validate(self, attrs):
         if attrs['password'] != attrs['confirm_password']:
@@ -113,3 +128,65 @@ class SellerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Seller
         fields = ['user', 'id', 'status']
+
+
+PERSONAL_DATA_FIELDS = (
+    'user', 'inn', 'snils',
+    'passport_series', 'passport_number',
+    'passport_issued_by', 'passport_issued_date',
+)
+
+class PersonalDataRegistrationSerializer(serializers.ModelSerializer):
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+
+    inn = serializers.CharField(
+        validators=[digits_of_length(12, 'ИНН')]
+    )
+    snils = serializers.CharField(
+        validators=[digits_of_length(11, 'СНИЛС')]
+    )
+    passport_series = serializers.CharField(
+        validators=[digits_of_length(4, 'Серия паспорта')]
+    )
+    passport_number = serializers.CharField(
+        validators=[digits_of_length(6, 'Номер паспорта')]
+    )
+
+    class Meta:
+        model = PersonalData
+        fields = PERSONAL_DATA_FIELDS
+
+
+class PersonalDataSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PersonalData
+        fields = ('id',) + PERSONAL_DATA_FIELDS
+
+
+class AgentSerializerRegistration(serializers.ModelSerializer):
+    class Meta:
+        model = Agent
+        fields = ('id', 'is_active')
+        read_only_fields = ('id',)
+
+    def validate(self, attrs):
+        request = self.context.get('request')
+        try:
+            request.user.personal_data
+        except ObjectDoesNotExist:
+            raise serializers.ValidationError(
+                'Сначала заполните персональные данные.'
+            )
+        return attrs
+
+    def create(self, validated_data):
+        validated_data['personal_data'] = self.context['request'].user.personal_data
+        return super().create(validated_data)
+
+
+class AgentSerializer(serializers.ModelSerializer):
+    personal_data = PersonalDataSerializer(read_only=True)
+
+    class Meta:
+        model = Agent
+        fields = ('id', 'personal_data', 'is_active')

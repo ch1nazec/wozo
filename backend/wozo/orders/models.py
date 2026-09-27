@@ -27,6 +27,11 @@ class Order(models.Model):
 
         indexes = [models.Index(fields=['user'])]
 
+    @property
+    def total_price(self):
+        return sum(item.price * item.quantity for item in self.items.all())
+
+
     def change_status(self, new_status: str):
         if self.status == 'got':
             raise ValidationError(f'Заказ получен и нельзя поменять статус.')
@@ -46,7 +51,6 @@ class Order(models.Model):
 
     def __str__(self):
         return f'{self.user} - {self.created_at} {self.status}'
-
 
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, verbose_name='Предмет товара', related_name='items')
