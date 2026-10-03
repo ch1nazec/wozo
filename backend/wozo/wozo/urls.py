@@ -25,7 +25,7 @@ from drf_spectacular.views import (SpectacularAPIView,
 
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('admin-panel-nasway/', admin.site.urls),
 
     path('api/v1/users/', include('users.urls')),
     path('api/v1/products/', include('products.urls')),

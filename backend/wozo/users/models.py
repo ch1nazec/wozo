@@ -115,3 +115,6 @@ class Agent(models.Model):
         ]
         verbose_name = 'Агент'
         verbose_name_plural = 'Агенты'
+
+    def __str__(self):
+        return f'{self.personal_data.user}'

@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.request import Request
 
-from rest_framework import status, viewsets
+from rest_framework import status, viewsets, permissions
 from rest_framework.views import APIView
 from rest_framework.decorators import action, api_view
 
@@ -19,12 +19,16 @@ from pickups.models import PickupPoint, OrderPickup, OrderPickupHistory
 
 from .filters import OrderFilters
 from .services import check_order
+from services.pagination_classes import FiftyResultsSetPagination
 
 
 # Create your views here.
 class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.all()
+    permission_classes = [permissions.IsAuthenticated, permissions.IsAdminUser]
     filterset_class = OrderFilters
+
+    pagination_class = FiftyResultsSetPagination
 
     ordering = ('created_at',)
     ordering_fields = ('created_at', 'updated_at', 'status')

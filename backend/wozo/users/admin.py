@@ -36,7 +36,7 @@ class CustomUserAdmin(admin.ModelAdmin):
 @admin.register(PersonalData)
 class PersonalDataAdmin(admin.ModelAdmin):
     list_display = [
-        'user', 'inn', 'snils',
+        'id', 'user', 'inn', 'snils',
         'passport_series', 'passport_number',
         'passport_issued_by', 'passport_issued_date'
         ]

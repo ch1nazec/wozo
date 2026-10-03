@@ -10,20 +10,25 @@ from rest_framework.decorators import action
 from rest_framework.views import APIView
 from rest_framework import viewsets
 
-from rest_framework import status
+from rest_framework import status, permissions
 
 from .filters import PickupPointFilters
+from .permissions import IsAgent
 from .models import PickupPoint, OrderPickupHistory, OrderPickup, PickupFeedback, PickupImage
 from .serializer import (PickupPointSerializer, OrderPickupHistorySerializer,
                          OrderPickupSerializer, PickupImageSerializer,
                          PickupFeedbackSerializer)
+from services.pagination_classes import HunderResultsSetPagination
 
 
 # Create your views here.
 class PickupPointViewSet(viewsets.ModelViewSet):
     queryset = PickupPoint.objects.all()
+    permission_classes = [IsAgent, permissions.IsAdminUser]
     serializer_class = PickupPointSerializer
     filterset_class = PickupPointFilters
+
+    pagination_class = HunderResultsSetPagination
 
     ordering_fields = ('latitude', 'longitude')
 
@@ -48,6 +53,8 @@ class PickupPointViewSet(viewsets.ModelViewSet):
 
 class PickupImageViewSet(viewsets.ModelViewSet):
     queryset = PickupImage.objects.all()
+    permission_classes = [IsAgent, permissions.IsAdminUser]
+    
     serializer_class = PickupImageSerializer
 
     def get_queryset(self):

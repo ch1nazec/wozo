@@ -12,6 +12,7 @@ class PickupPoint(models.Model):
 
     latitude = models.DecimalField(verbose_name='Ширина', max_digits=9, decimal_places=6)
     longitude = models.DecimalField(verbose_name='Долгота', max_digits=9, decimal_places=6)
+    address = models.TextField(verbose_name='Адрес ПВЗ', max_length=400, blank=True, null=True, unique=True)
 
     is_active = models.BooleanField(default=True, verbose_name='Статус')
 

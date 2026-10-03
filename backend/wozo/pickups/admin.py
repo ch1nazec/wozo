@@ -5,9 +5,9 @@ from .models import PickupPoint, OrderPickupHistory, OrderPickup, PickupFeedback
 # Register your models here.
 @admin.register(PickupPoint)
 class PickupPointAdmin(admin.ModelAdmin):
-    list_display = ('id', 'latitude', 'longitude', 'is_active')
-    search_fields = ('latitude', 'longitude',)
-    list_filter = ('latitude', 'longitude', 'is_active')
+    list_display = ('id', 'agent', 'address', 'latitude', 'longitude', 'is_active')
+    search_fields = ('agent', 'latitude', 'longitude',)
+    list_filter = ('address', 'latitude', 'longitude', 'is_active')
 
     list_per_page = 30
     ordering = ('latitude', 'longitude',)
